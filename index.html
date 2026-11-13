@@ -1,11 +1,437 @@
-<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AIM · Inventario de servidores</title><style>:root{font-family:system-ui,Segoe UI,Arial,sans-serif;color:#e8edf5;background:#0d1421}*{box-sizing:border-box}body{margin:0}header{padding:25px max(20px,calc((100vw - 920px)/2));background:#142238;border-bottom:1px solid #2d405b}h1{margin:0;font-size:25px}header p{color:#b5c4d8;margin:6px 0 0}main{max-width:920px;margin:30px auto;padding:0 20px}.panel{background:#19283e;border:1px solid #34465f;border-radius:15px;padding:24px;margin-bottom:18px}input{width:100%;background:#0d1829;border:1px solid #455b76;border-radius:9px;padding:13px;color:white;font-size:16px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.item{background:#1b2b42;border:1px solid #354b67;border-radius:12px;padding:18px;text-decoration:none;color:inherit}.item:hover{border-color:#62b7ff}.muted{color:#aebed0}.back{color:#7bc5ff;text-decoration:none}dl{display:grid;grid-template-columns:minmax(115px,35%) 1fr;gap:0}dt,dd{margin:0;padding:12px 4px;border-bottom:1px solid #35475e;overflow-wrap:anywhere}dt{color:#aebed0}button{background:#2776c6;border:0;color:white;padding:11px 15px;border-radius:8px;cursor:pointer}small{color:#aebed0}#notfound{display:none}</style></head><body><header><h1>AIM · Inventario de servidores</h1><p>Consulta de equipos mediante código QR</p></header><main><section id="listing"><div class="panel"><h2>Buscar servidor</h2><input id="search" placeholder="Ej. SERVER 001" autocomplete="off"></div><div class="grid" id="cards"></div></section><section id="detail" hidden><p><a class="back" href="./">← Todos los servidores</a></p><div class="panel"><h2 id="name"></h2><p class="muted" id="subtitle"></p><dl id="specs"></dl><p><button id="copy">Copiar enlace de esta ficha</button></p></div></section><section id="notfound" class="panel"><h2>Servidor no encontrado</h2><p>Comprueba el código o vuelve al inventario.</p><a class="back" href="./">Ver inventario</a></section><p><small>Datos de ejemplo: sustituir por las especificaciones reales antes de publicar.</small></p></main><script>
-// EDITA AQUÍ EL INVENTARIO. Cada ID debe ser único y no cambiar una vez impreso el QR.
-const servidores=[
-{id:'001',nombre:'SERVER 001',ubicacion:'Pendiente de asignar',procesador:'Intel Core i7 (ejemplo)',placa:'Pendiente de registrar',ram:'32 GB DDR4 (ejemplo)',grafica:'NVIDIA RTX (ejemplo)',almacenamiento:'Pendiente de registrar',sistema:'Windows 10 (ejemplo)',aim:'10.68 (ejemplo)',serie:'AIM-001 (ejemplo)',observaciones:'Ficha de demostración'},
-{id:'002',nombre:'SERVER 002',ubicacion:'Pendiente de asignar',procesador:'Pendiente de registrar',placa:'Pendiente de registrar',ram:'Pendiente de registrar',grafica:'Pendiente de registrar',almacenamiento:'Pendiente de registrar',sistema:'Pendiente de registrar',aim:'Pendiente de registrar',serie:'Pendiente de registrar',observaciones:''},
-{id:'003',nombre:'SERVER 003',ubicacion:'Pendiente de asignar',procesador:'Pendiente de registrar',placa:'Pendiente de registrar',ram:'Pendiente de registrar',grafica:'Pendiente de registrar',almacenamiento:'Pendiente de registrar',sistema:'Pendiente de registrar',aim:'Pendiente de registrar',serie:'Pendiente de registrar',observaciones:''}
-];
-const fields=[['ubicacion','Ubicación'],['procesador','Procesador'],['placa','Placa base'],['ram','Memoria RAM'],['grafica','Tarjeta gráfica'],['almacenamiento','Almacenamiento'],['sistema','Sistema operativo'],['aim','Versión AIM'],['serie','Número de serie'],['observaciones','Observaciones']];
-const qs=new URLSearchParams(location.search),id=qs.get('id'),server=servidores.find(s=>s.id===id);const el=(tag,text)=>{const x=document.createElement(tag);x.textContent=text??'';return x};if(id){document.getElementById('listing').hidden=true;if(!server){document.getElementById('notfound').style.display='block'}else{document.getElementById('detail').hidden=false;document.getElementById('name').textContent=server.nombre;document.getElementById('subtitle').textContent='Ficha técnica · '+server.id;const dl=document.getElementById('specs');fields.forEach(([key,label])=>{dl.append(el('dt',label),el('dd',server[key]||'—'))});document.getElementById('copy').onclick=()=>navigator.clipboard.writeText(location.href).then(()=>alert('Enlace copiado')).catch(()=>prompt('Copia este enlace:',location.href))}}else{const cards=document.getElementById('cards');function render(term=''){cards.replaceChildren();servidores.filter(s=>(s.nombre+' '+s.ubicacion+' '+s.serie).toLowerCase().includes(term.toLowerCase())).forEach(s=>{const a=el('a');a.className='item';a.href='?id='+encodeURIComponent(s.id);a.append(el('h3',s.nombre),el('p',s.ubicacion));cards.append(a)});if(!cards.children.length)cards.append(el('p','No se encontraron servidores.'))}render();document.getElementById('search').addEventListener('input',e=>render(e.target.value))}
-</script></body></html>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AIM | Inventario de servidores</title>
+  <style>
+    :root {
+      --bg: #101722;
+      --panel: #1b2635;
+      --border: #344357;
+      --text: #f1f5f9;
+      --muted: #a9b8ca;
+      --blue: #38bdf8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      background: #172231;
+      padding: 25px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 22px;
+    }
+
+    h1 { margin: 0 0 8px; }
+    h2 { margin-top: 0; }
+
+    .muted { color: var(--muted); }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: #253449;
+      color: white;
+      font-size: 16px;
+      margin-bottom: 22px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(
+        auto-fill, minmax(230px, 1fr)
+      );
+      gap: 15px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card h3 { margin-top: 0; }
+
+    .btn {
+      display: inline-block;
+      padding: 11px 16px;
+      background: var(--blue);
+      color: #07131d;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn:hover { background: #7dd3fc; }
+
+    .details {
+      max-width: 750px;
+      margin: 25px auto;
+    }
+
+    .field {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .field strong {
+      display: block;
+      color: var(--blue);
+      margin-bottom: 5px;
+    }
+
+    .field span {
+      overflow-wrap: anywhere;
+    }
+
+    .back { margin-bottom: 20px; }
+
+    .count { margin-bottom: 20px; }
+
+    footer {
+      padding: 30px;
+      text-align: center;
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="container">
+    <h1>AIM | Server Inventory</h1>
+    <p class="muted">
+      Inventario técnico de servidores
+    </p>
+  </div>
+</header>
+
+<main class="container" id="app"></main>
+
+<footer>
+  AIM - Technical Department
+</footer>
+
+<script>
+/*
+==========================================
+ INVENTARIO AIM - 53 SERVIDORES
+==========================================
+
+Para modificar un servidor, busca su número
+en el objeto DATOS_SERVIDORES.
+
+Los servidores sin datos específicos muestran
+"Pendiente de registrar".
+
+Los enlaces QR tienen este formato:
+
+?id=001
+?id=002
+?id=003
+
+Y así sucesivamente hasta el 053.
+
+==========================================
+*/
+
+// Campos generales de cada servidor
+
+const CAMPOS = {
+  procesador: "Procesador",
+  placa: "Placa base",
+  ram: "Memoria RAM",
+  grafica: "Tarjeta gráfica",
+  almacenamiento: "Almacenamiento",
+  windows: "Sistema operativo",
+  aim: "Versión AIM",
+  serie: "Número de serie",
+  ubicacion: "Ubicación",
+  observaciones: "Observaciones"
+};
+
+// ========================================
+// EDITAR INFORMACIÓN DE LOS SERVIDORES
+// ========================================
+
+const DATOS_SERVIDORES = {
+
+  "001": {
+    procesador: "Intel Core i7",
+    placa: "Pendiente de registrar",
+    ram: "32 GB DDR4",
+    grafica: "NVIDIA RTX",
+    almacenamiento: "Pendiente de registrar",
+    windows: "Windows 10",
+    aim: "10.68",
+    serie: "AIM-001",
+    ubicacion: "Pendiente de registrar",
+    observaciones: ""
+  },
+
+  "002": {
+    procesador: "Pendiente de registrar",
+    placa: "Pendiente de registrar",
+    ram: "Pendiente de registrar",
+    grafica: "Pendiente de registrar",
+    almacenamiento: "Pendiente de registrar",
+    windows: "Windows 10",
+    aim: "Pendiente de registrar",
+    serie: "AIM-002",
+    ubicacion: "Pendiente de registrar",
+    observaciones: ""
+  },
+
+  "003": {
+    procesador: "Pendiente de registrar",
+    placa: "Pendiente de registrar",
+    ram: "Pendiente de registrar",
+    grafica: "Pendiente de registrar",
+    almacenamiento: "Pendiente de registrar",
+    windows: "Windows 10",
+    aim: "Pendiente de registrar",
+    serie: "AIM-003",
+    ubicacion: "Pendiente de registrar",
+    observaciones: ""
+  }
+
+};
+
+// ========================================
+// CREAR AUTOMÁTICAMENTE 53 SERVIDORES
+// ========================================
+
+const servidores = [];
+
+for (let numero = 1; numero <= 53; numero++) {
+
+  const id = String(numero).padStart(3, "0");
+
+  const datos = {
+    procesador: "Pendiente de registrar",
+    placa: "Pendiente de registrar",
+    ram: "Pendiente de registrar",
+    grafica: "Pendiente de registrar",
+    almacenamiento: "Pendiente de registrar",
+    windows: "Pendiente de registrar",
+    aim: "Pendiente de registrar",
+    serie: "Pendiente de registrar",
+    ubicacion: "Pendiente de registrar",
+    observaciones: "",
+    ...(DATOS_SERVIDORES[id] || {})
+  };
+
+  servidores.push({
+    id: id,
+    nombre: "SERVER " + id,
+    ...datos
+  });
+
+}
+
+// ========================================
+// FUNCIONES DE LA PÁGINA
+// ========================================
+
+const app = document.getElementById("app");
+
+function crearElemento(etiqueta, clase, texto) {
+  const elemento = document.createElement(etiqueta);
+
+  if (clase) {
+    elemento.className = clase;
+  }
+
+  if (texto !== undefined) {
+    elemento.textContent = texto;
+  }
+
+  return elemento;
+}
+
+function mostrarInventario() {
+
+  app.replaceChildren();
+
+  const titulo = crearElemento(
+    "h2", "", "Inventario de servidores AIM"
+  );
+
+  const contador = crearElemento(
+    "p", "muted count",
+    "Total: " + servidores.length + " servidores"
+  );
+
+  const buscador = crearElemento("input");
+  buscador.type = "search";
+  buscador.placeholder =
+    "Buscar servidor por número, ubicación o serie...";
+
+  const grid = crearElemento("div", "grid");
+
+  app.append(titulo, contador, buscador, grid);
+
+  function pintar(filtro = "") {
+
+    grid.replaceChildren();
+
+    const resultados = servidores.filter(s => {
+      const texto = [
+        s.nombre,
+        s.ubicacion,
+        s.serie
+      ].join(" ").toLowerCase();
+
+      return texto.includes(filtro.toLowerCase());
+    });
+
+    contador.textContent =
+      "Mostrando " + resultados.length +
+      " de " + servidores.length + " servidores";
+
+    if (resultados.length === 0) {
+      grid.appendChild(
+        crearElemento("p", "muted",
+          "No se encontraron servidores.")
+      );
+      return;
+    }
+
+    resultados.forEach(servidor => {
+
+      const card = crearElemento("div", "card");
+
+      const nombre = crearElemento(
+        "h3", "", servidor.nombre
+      );
+
+      const ubicacion = crearElemento(
+        "p", "muted",
+        "Ubicación: " + servidor.ubicacion
+      );
+
+      const enlace = crearElemento(
+        "a", "btn", "Ver ficha técnica"
+      );
+
+      enlace.href =
+        "?id=" + encodeURIComponent(servidor.id);
+
+      card.append(nombre, ubicacion, enlace);
+      grid.appendChild(card);
+
+    });
+  }
+
+  buscador.addEventListener("input", () => {
+    pintar(buscador.value);
+  });
+
+  pintar();
+}
+
+function mostrarServidor(id) {
+
+  app.replaceChildren();
+
+  const servidor = servidores.find(s => s.id === id);
+
+  if (!servidor) {
+
+    app.appendChild(
+      crearElemento("h2", "",
+        "Servidor no encontrado")
+    );
+
+    const volver = crearElemento(
+      "a", "btn", "Volver al inventario"
+    );
+
+    volver.href = window.location.pathname;
+
+    app.appendChild(volver);
+    return;
+  }
+
+  const contenedor = crearElemento("div", "details");
+
+  const volver = crearElemento(
+    "a", "btn back", "← Volver al inventario"
+  );
+
+  volver.href = window.location.pathname;
+
+  const tarjeta = crearElemento("div", "card");
+
+  const titulo = crearElemento(
+    "h2", "", "AIM " + servidor.nombre
+  );
+
+  const subtitulo = crearElemento(
+    "p", "muted", "Ficha técnica del equipo"
+  );
+
+  tarjeta.append(titulo, subtitulo);
+
+  Object.entries(CAMPOS).forEach(([clave, etiqueta]) => {
+
+    const campo = crearElemento("div", "field");
+
+    const nombre = crearElemento(
+      "strong", "", etiqueta
+    );
+
+    const valor = crearElemento(
+      "span", "",
+      servidor[clave] || "Pendiente de registrar"
+    );
+
+    campo.append(nombre, valor);
+    tarjeta.appendChild(campo);
+
+  });
+
+  contenedor.append(volver, tarjeta);
+  app.appendChild(contenedor);
+}
+
+// ========================================
+// DETECTAR SI VIENE DESDE UN CÓDIGO QR
+// ========================================
+
+const parametros = new URLSearchParams(
+  window.location.search
+);
+
+const servidorSolicitado = parametros.get("id");
+
+if (servidorSolicitado) {
+  mostrarServidor(servidorSolicitado);
+} else {
+  mostrarInventario();
+}
+
+</script>
+
+</body>
+</html>
