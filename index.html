@@ -2,117 +2,134 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AIM | Inventario de servidores </title>
-  <style>
-    :root {
-      --bg: #101722;
-      --panel: #1b2635;
-      --border: #344357;
-      --text: #f1f5f9;
-      --muted: #a9b8ca;
-      --blue: #38bdf8;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIM | Server Inventory</title>
 
-    * { box-sizing: border-box; }
+<style>
+:root {
+  --bg: #101722;
+  --panel: #1b2635;
+  --border: #344357;
+  --text: #f1f5f9;
+  --muted: #a9b8ca;
+  --blue: #38bdf8;
+}
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, sans-serif;
-    }
+* {
+  box-sizing: border-box;
+}
 
-    header {
-      background: #172231;
-      padding: 25px 18px;
-      border-bottom: 1px solid var(--border);
-    }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
 
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      padding: 22px;
-    }
+header {
+  background: #172231;
+  padding: 25px 18px;
+  border-bottom: 1px solid var(--border);
+}
 
-    h1 { margin: 0 0 8px; }
-    h2 { margin-top: 0; }
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 22px;
+}
 
-    .muted { color: var(--muted); }
+h1 {
+  margin: 0 0 8px;
+}
 
-    input {
-      width: 100%;
-      padding: 14px;
-      border-radius: 9px;
-      border: 1px solid var(--border);
-      background: #253449;
-      color: white;
-      font-size: 16px;
-      margin-bottom: 22px;
-    }
+h2 {
+  margin-top: 0;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(
-        auto-fill, minmax(230px, 1fr)
-      );
-      gap: 15px;
-    }
+.muted {
+  color: var(--muted);
+}
 
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: #253449;
+  color: white;
+  font-size: 16px;
+  margin-bottom: 22px;
+}
 
-    .card h3 { margin-top: 0; }
+.grid {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(230px, 1fr));
+  gap: 15px;
+}
 
-    .btn {
-      display: inline-block;
-      padding: 11px 16px;
-      background: var(--blue);
-      color: #07131d;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-    }
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
 
-    .btn:hover { background: #7dd3fc; }
+.card h3 {
+  margin-top: 0;
+}
 
-    .details {
-      max-width: 750px;
-      margin: 25px auto;
-    }
+.btn {
+  display: inline-block;
+  padding: 11px 16px;
+  background: var(--blue);
+  color: #07131d;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+}
 
-    .field {
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-    }
+.btn:hover {
+  background: #7dd3fc;
+}
 
-    .field strong {
-      display: block;
-      color: var(--pink);
-      margin-bottom: 5px;
-    }
+.details {
+  max-width: 750px;
+  margin: 25px auto;
+}
 
-    .field span {
-      overflow-wrap: anywhere;
-    }
+.field {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
 
-    .back { margin-bottom: 20px; }
+.field strong {
+  display: block;
+  color: var(--blue);
+  margin-bottom: 5px;
+}
 
-    .count { margin-bottom: 20px; }
+.field span {
+  overflow-wrap: anywhere;
+}
 
-    footer {
-      padding: 30px;
-      text-align: center;
-      color: var(--muted);
-    }
-  </style>
+.back {
+  margin-bottom: 20px;
+}
+
+.count {
+  margin-bottom: 20px;
+}
+
+footer {
+  padding: 30px;
+  text-align: center;
+  color: var(--muted);
+}
+</style>
 </head>
 
 <body>
@@ -133,47 +150,55 @@
 </footer>
 
 <script>
+
 /*
 ==========================================
  INVENTARIO AIM - 53 SERVIDORES
 ==========================================
 
-Para modificar un servidor, busca su número
-en el objeto DATOS_SERVIDORES.
+MODIFICAR SERVIDORES:
 
-Los servidores sin datos específicos muestran
-"Pendiente de registrar".
+Edita los valores dentro de DATOS_SERVIDORES.
 
-Los enlaces QR tienen este formato:
+No modifiques el bucle que genera los
+53 servidores.
+
+Cada servidor tiene su enlace QR:
 
 ?id=001
 ?id=002
 ?id=003
 
-Y así sucesivamente hasta el 053.
+Hasta:
+
+?id=053
 
 ==========================================
 */
 
-// Campos generales de cada servidor
+// ========================================
+// CAMPOS DE LAS FICHAS TÉCNICAS
+// ========================================
 
 const CAMPOS = {
-  Procesador: "Procesador",
-  Placa: "Placa base",
-  Ram: "Memoria RAM",
-  Grafica: "Tarjeta gráfica",
-  Almacenamientodisco: "Almacenamiento",
-  Windows: "Sistema operativo",
-  Versionaim: "Versión AIM",
-  Numero: "Número",
-  Ubicacion: "Ubicación",
-  Observaciones: "Observaciones",
-  Perifericos : "Observaciones"
+  procesador: "Procesador",
+  placa: "Placa base",
+  ram: "Memoria RAM",
+  grafica: "Tarjeta gráfica",
+  almacenamiento: "Almacenamiento",
+  windows: "Sistema operativo",
+  aim: "Versión AIM",
+  serie: "Número",
+  ubicacion: "Ubicación",
+  observaciones: "Observaciones",
+  perifericos: "Periféricos"
 };
 
 // ========================================
-// EDITAR INFORMACIÓN DE LOS SERVIDORES
+// INFORMACIÓN DE LOS SERVIDORES
 // ========================================
+
+// EDITA LOS DATOS EN ESTA SECCIÓN
 
 const DATOS_SERVIDORES = {
 
@@ -187,7 +212,8 @@ const DATOS_SERVIDORES = {
     aim: "10.68",
     serie: "AIM-001",
     ubicacion: "Pendiente de registrar",
-    observaciones: ""
+    observaciones: "",
+    perifericos: "Pendiente de registrar"
   },
 
   "002": {
@@ -200,7 +226,8 @@ const DATOS_SERVIDORES = {
     aim: "Pendiente de registrar",
     serie: "AIM-002",
     ubicacion: "Pendiente de registrar",
-    observaciones: ""
+    observaciones: "",
+    perifericos: "Pendiente de registrar"
   },
 
   "003": {
@@ -213,12 +240,36 @@ const DATOS_SERVIDORES = {
     aim: "Pendiente de registrar",
     serie: "AIM-003",
     ubicacion: "Pendiente de registrar",
-    observaciones: ""
-  },
+    observaciones: "",
+    perifericos: "Pendiente de registrar"
+  }
+
+  /*
+  EJEMPLO PARA AÑADIR OTRO SERVIDOR:
+
+  Añade una coma después del bloque anterior
+  y escribe:
+
+  "004": {
+    procesador: "Intel Core i9",
+    placa: "ASUS PRIME Z790",
+    ram: "64 GB DDR5",
+    grafica: "NVIDIA RTX 4070",
+    almacenamiento: "SSD 2 TB",
+    windows: "Windows 11 Pro",
+    aim: "10.68",
+    serie: "AIM-004",
+    ubicacion: "RCD Espanyol",
+    observaciones: "Servidor principal",
+    perifericos: "Teclado y ratón"
+  }
+
+  */
 
 };
+
 // ========================================
-// CREAR AUTOMÁTICAMENTE 53 SERVIDORES
+// GENERAR LOS 53 SERVIDORES
 // ========================================
 
 const servidores = [];
@@ -227,36 +278,38 @@ for (let numero = 1; numero <= 53; numero++) {
 
   const id = String(numero).padStart(3, "0");
 
-const datos = {
-  procesador: "Pendiente de registrar",
-  placa: "Pendiente de registrar",
-  ram: "Pendiente de registrar",
-  grafica: "Pendiente de registrar",
-  almacenamiento: "Pendiente de registrar",
-  windows: "Pendiente de registrar",
-  aim: "Pendiente de registrar",
-  serie: "Pendiente de registrar",
-  ubicacion: "Pendiente de registrar",
-  observaciones: "",
-  ...(DATOS_SERVIDORES[id] || {})
-};
+  const datos = {
+    procesador: "Pendiente de registrar",
+    placa: "Pendiente de registrar",
+    ram: "Pendiente de registrar",
+    grafica: "Pendiente de registrar",
+    almacenamiento: "Pendiente de registrar",
+    windows: "Pendiente de registrar",
+    aim: "Pendiente de registrar",
+    serie: "Pendiente de registrar",
+    ubicacion: "Pendiente de registrar",
+    observaciones: "",
+    perifericos: "Pendiente de registrar",
 
-servidores.push({
-  id: id,
-  nombre: "SERVER " + id,
-  ...datos,
-  ...(DATOS_SERVIDORES[id] || {})
-});
+    ...(DATOS_SERVIDORES[id] || {})
+  };
+
+  servidores.push({
+    id: id,
+    nombre: "SERVER " + id,
+    ...datos
+  });
 
 }
 
 // ========================================
-// FUNCIONES DE LA PÁGINA
+// FUNCIONES GENERALES
 // ========================================
 
 const app = document.getElementById("app");
 
 function crearElemento(etiqueta, clase, texto) {
+
   const elemento = document.createElement(etiqueta);
 
   if (clase) {
@@ -270,21 +323,30 @@ function crearElemento(etiqueta, clase, texto) {
   return elemento;
 }
 
+// ========================================
+// MOSTRAR INVENTARIO
+// ========================================
+
 function mostrarInventario() {
 
   app.replaceChildren();
 
   const titulo = crearElemento(
-    "h2", "", "Inventario de servidores AIM"
+    "h2",
+    "",
+    "Inventario de servidores AIM"
   );
 
   const contador = crearElemento(
-    "p", "muted count",
+    "p",
+    "muted count",
     "Total: " + servidores.length + " servidores"
   );
 
   const buscador = crearElemento("input");
+
   buscador.type = "search";
+
   buscador.placeholder =
     "Buscar servidor por número, ubicación o serie...";
 
@@ -297,6 +359,7 @@ function mostrarInventario() {
     grid.replaceChildren();
 
     const resultados = servidores.filter(s => {
+
       const texto = [
         s.nombre,
         s.ubicacion,
@@ -304,6 +367,7 @@ function mostrarInventario() {
       ].join(" ").toLowerCase();
 
       return texto.includes(filtro.toLowerCase());
+
     });
 
     contador.textContent =
@@ -311,10 +375,15 @@ function mostrarInventario() {
       " de " + servidores.length + " servidores";
 
     if (resultados.length === 0) {
+
       grid.appendChild(
-        crearElemento("p", "muted",
-          "No se encontraron servidores.")
+        crearElemento(
+          "p",
+          "muted",
+          "No se encontraron servidores."
+        )
       );
+
       return;
     }
 
@@ -323,25 +392,32 @@ function mostrarInventario() {
       const card = crearElemento("div", "card");
 
       const nombre = crearElemento(
-        "h3", "", servidor.nombre
+        "h3",
+        "",
+        servidor.nombre
       );
 
       const ubicacion = crearElemento(
-        "p", "muted",
+        "p",
+        "muted",
         "Ubicación: " + servidor.ubicacion
       );
 
       const enlace = crearElemento(
-        "a", "btn", "Ver ficha técnica"
+        "a",
+        "btn",
+        "Ver ficha técnica"
       );
 
       enlace.href =
         "?id=" + encodeURIComponent(servidor.id);
 
       card.append(nombre, ubicacion, enlace);
+
       grid.appendChild(card);
 
     });
+
   }
 
   buscador.addEventListener("input", () => {
@@ -349,82 +425,109 @@ function mostrarInventario() {
   });
 
   pintar();
+
 }
+
+// ========================================
+// MOSTRAR FICHA DE UN SERVIDOR
+// ========================================
 
 function mostrarServidor(id) {
 
   app.replaceChildren();
 
-  const servidorBase = servidores.find(s => s.id === id);
-
-const servidor = servidorBase
-  ? {
-      ...servidorBase,
-      ...(DATOS_SERVIDORES[id] || {})
-    }
-  : null;
+  const servidor = servidores.find(s => s.id === id);
 
   if (!servidor) {
 
     app.appendChild(
-      crearElemento("h2", "",
-        "Servidor no encontrado")
+      crearElemento(
+        "h2",
+        "",
+        "Servidor no encontrado"
+      )
     );
 
     const volver = crearElemento(
-      "a", "btn", "Volver al inventario"
+      "a",
+      "btn",
+      "Volver al inventario"
     );
 
     volver.href = window.location.pathname;
 
     app.appendChild(volver);
+
     return;
   }
 
-  const contenedor = crearElemento("div", "details");
+  const contenedor = crearElemento(
+    "div",
+    "details"
+  );
 
   const volver = crearElemento(
-    "a", "btn back", "← Volver al inventario"
+    "a",
+    "btn back",
+    "← Volver al inventario"
   );
 
   volver.href = window.location.pathname;
 
-  const tarjeta = crearElemento("div", "card");
+  const tarjeta = crearElemento(
+    "div",
+    "card"
+  );
 
   const titulo = crearElemento(
-    "h2", "", "AIM " + servidor.nombre
+    "h2",
+    "",
+    "AIM " + servidor.nombre
   );
 
   const subtitulo = crearElemento(
-    "p", "muted", "Ficha técnica del equipo"
+    "p",
+    "muted",
+    "Ficha técnica del equipo"
   );
 
   tarjeta.append(titulo, subtitulo);
 
-  Object.entries(CAMPOS).forEach(([clave, etiqueta]) => {
+  Object.entries(CAMPOS).forEach(
+    ([clave, etiqueta]) => {
 
-    const campo = crearElemento("div", "field");
+      const campo = crearElemento(
+        "div",
+        "field"
+      );
 
-    const nombre = crearElemento(
-      "strong", "", etiqueta
-    );
+      const nombre = crearElemento(
+        "strong",
+        "",
+        etiqueta
+      );
 
-    const valor = crearElemento(
-      "span", "",
-      servidor[clave] || "Pendiente de registrar"
-    );
+      const valor = crearElemento(
+        "span",
+        "",
+        servidor[clave] || "Pendiente de registrar"
+      );
 
-    campo.append(nombre, valor);
-    tarjeta.appendChild(campo);
+      campo.append(nombre, valor);
 
-  });
+      tarjeta.appendChild(campo);
+
+    }
+  );
 
   contenedor.append(volver, tarjeta);
+
   app.appendChild(contenedor);
+
 }
 
 // ========================================
-// DETECTAR SI VIENE DESDE UN CÓDIGO QR
+// DETECTAR EL SERVIDOR DESDE EL QR
 // ========================================
 
 const parametros = new URLSearchParams(
@@ -434,12 +537,17 @@ const parametros = new URLSearchParams(
 const servidorSolicitado = parametros.get("id");
 
 if (servidorSolicitado) {
+
   mostrarServidor(servidorSolicitado);
+
 } else {
+
   mostrarInventario();
+
 }
 
 </script>
 
 </body>
 </html>
+
