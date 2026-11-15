@@ -138,7 +138,31 @@ input { background:#fff; color:#262036; border:1px solid #f5c1df; }
 footer { color:#fff; text-shadow:0 1px 4px rgba(95,0,65,.5); }
 @media (max-width:550px) { header h1 {font-size:1.35rem;} header .container {padding:12px 16px;} .aim-logo {width:92px;} }
 
-  </style>
+  
+.toolbar {display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 20px}
+.toolbar .btn {font-size:14px}
+.status {display:inline-block;padding:6px 11px;border-radius:999px;font-size:12px;font-weight:700;background:#e9eaf0;color:#555}
+.status-operativo {background:#d8f5e4;color:#14673b}
+.status-mantenimiento {background:#fff0c5;color:#835b00}
+.status-averiado {background:#ffe0e4;color:#a01732}
+.status-pendiente {background:#ede9f3;color:#61586b}
+.status-line {margin:12px 0}
+.qr-box {background:#fff;border:1px solid #f1d4e5;border-radius:12px;padding:20px;margin-top:22px;text-align:center}
+.qr-code {display:flex;justify-content:center;margin:16px auto}
+.qr-code img,.qr-code canvas {max-width:100%;height:auto}
+.qr-link {overflow-wrap:anywhere;font-size:12px;color:#605469}
+.summary {display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.summary span {background:#fff;padding:9px 13px;border-radius:8px;font-size:13px}
+@media print {
+ body {background:white!important;color:black!important}
+ header,footer,.back,.toolbar,.field,.summary,.no-print {display:none!important}
+ .container,.details {padding:0!important;margin:0!important;max-width:none!important}
+ .card {border:0!important;box-shadow:none!important}
+ .qr-box {border:0!important;margin:0!important}
+ .qr-code {margin:12px auto!important}
+ .print-title {font-size:22px!important}
+}
+</style>
 </head>
 
 <body>
@@ -159,51 +183,26 @@ footer { color:#fff; text-shadow:0 1px 4px rgba(95,0,65,.5); }
   AIM - Control servers of Eric Cabet
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-/*
-==========================================
- INVENTARIO AIM - 53 SERVIDORES
-==========================================
-
-Para modificar un servidor, busca su número
-en el objeto DATOS_SERVIDORES.
-
-Los servidores sin datos específicos muestran
-"Pendiente de registrar".
-
-Los enlaces QR tienen este formato:
-
-?id=001
-?id=002
-?id=003
-
-Y así sucesivamente hasta el 053.
-
-==========================================
-*/
-
-// Campos generales de cada servidor
-
+/* AIM SERVER INVENTORY — Editar solo DATOS_SERVIDORES.
+   Estado: "Operativo", "En mantenimiento", "Averiado" o "Pendiente de revisar".
+   Los QR existentes siguen usando ?id=001, ?id=002, etc. */
 const CAMPOS = {
-  procesador: "Procesador",
-  placa: "Placa base",
-  ram: "Memoria RAM",
-  grafica: "Tarjeta gráfica",
-  almacenamiento: "Almacenamiento",
-  windows: "Sistema operativo",
-  aim: "Versión AIM",
-  serie: "Número de serie",
-  ubicacion: "Ubicación",
-  observaciones: "Observaciones"
+  procesador:"Procesador", placa:"Placa base", ram:"Memoria RAM",
+  grafica:"Tarjeta gráfica", almacenamiento:"Almacenamiento",
+  windows:"Sistema operativo", aim:"Versión AIM", serie:"Número de serie",
+  ubicacion:"Ubicación", perifericos:"Periféricos", observaciones:"Observaciones"
 };
 
-// ========================================
-// EDITAR INFORMACIÓN DE LOS SERVIDORES
-// ========================================
-
+// =====================================================
+// EDITA AQUÍ LOS DATOS. Añade "004": {...}, etc.
+// Si ya tienes datos nuevos en GitHub, cópialos aquí
+// antes de sustituir tu archivo para no perderlos.
+// =====================================================
 const DATOS_SERVIDORES = {
-
   "001": {
+    estado: "Pendiente de revisar",
     procesador: "Intel Core i7",
     placa: "Pendiente de registrar",
     ram: "32 GB DDR4",
@@ -213,271 +212,86 @@ const DATOS_SERVIDORES = {
     aim: "10.68",
     serie: "AIM-001",
     ubicacion: "Pendiente de registrar",
+    perifericos: "Pendiente de registrar",
     observaciones: ""
   },
-
   "002": {
-    procesador: "Pendiente de registrar",
-    placa: "Pendiente de registrar",
-    ram: "Pendiente de registrar",
-    grafica: "Pendiente de registrar",
-    almacenamiento: "Pendiente de registrar",
-    windows: "Windows 10",
-    aim: "Pendiente de registrar",
-    serie: "AIM-002",
-    ubicacion: "Pendiente de registrar",
-    observaciones: ""
+    estado: "Pendiente de revisar",
+    windows: "Windows 10", serie: "AIM-002"
   },
-
   "003": {
-    procesador: "Pendiente de registrar",
-    placa: "Pendiente de registrar",
-    ram: "Pendiente de registrar",
-    grafica: "Pendiente de registrar",
-    almacenamiento: "Pendiente de registrar",
-    windows: "Windows 10",
-    aim: "Pendiente de registrar",
-    serie: "AIM-003",
-    ubicacion: "Pendiente de registrar",
-    observaciones: ""
-  },
-  "004": {
-    procesador: "prueba",
-    placa: "Pendiente de registrar",
-    ram: "Pendiente de registrar",
-    grafica: "Pendiente de registrar",
-    almacenamiento: "Pendiente de registrar",
-    windows: "Windows 10",
-    aim: "Pendiente de registrar",
-    serie: "AIM-004",
-    ubicacion: "Pendiente de registrar",
-    observaciones: ""
-  },
-
-};
-// ========================================
-// CREAR AUTOMÁTICAMENTE 53 SERVIDORES
-// ========================================
-
-const servidores = [];
-
-for (let numero = 1; numero <= 100; numero++) {
-
-  const id = String(numero).padStart(3, "0");
-
-const datos = {
-  procesador: "Pendiente de registrar",
-  placa: "Pendiente de registrar",
-  ram: "Pendiente de registrar",
-  grafica: "Pendiente de registrar",
-  almacenamiento: "Pendiente de registrar",
-  windows: "Pendiente de registrar",
-  aim: "Pendiente de registrar",
-  serie: "Pendiente de registrar",
-  ubicacion: "Pendiente de registrar",
-  observaciones: "",
-  ...(DATOS_SERVIDORES[id] || {})
+    estado: "Pendiente de revisar",
+    windows: "Windows 10", serie: "AIM-003"
+  }
 };
 
-servidores.push({
-  id: id,
-  nombre: "SERVER " + id,
-  ...datos,
-  ...(DATOS_SERVIDORES[id] || {})
+const ESTADOS = ["Operativo", "En mantenimiento", "Averiado", "Pendiente de revisar"];
+const servidores = Array.from({length:100}, (_,i) => {
+  const id=String(i+1).padStart(3,"0");
+  const vacio=Object.fromEntries(Object.keys(CAMPOS).map(k=>[k,"Pendiente de registrar"]));
+  return {id,nombre:"SERVER "+id,...vacio,estado:"Pendiente de revisar",...(DATOS_SERVIDORES[id]||{})};
 });
-
+const app=document.getElementById("app");
+const crear=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
+const linkServidor=id=>window.location.origin+window.location.pathname+"?id="+encodeURIComponent(id);
+const cssEstado=estado=>({"Operativo":"status-operativo","En mantenimiento":"status-mantenimiento","Averiado":"status-averiado"}[estado]||"status-pendiente");
+function insignia(estado){return crear("span","status "+cssEstado(estado),estado);}
+function boton(texto,accion){const b=crear("button","btn",texto);b.type="button";b.addEventListener("click",accion);return b;}
+function csvSeguro(valor){let s=String(valor??"");if(/^[\s]*[=+@\-]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
+function exportarCSV(){
+ const columnas=["id","estado",...Object.keys(CAMPOS)];
+ const cabecera=["Servidor","Estado",...Object.values(CAMPOS)];
+ const filas=[cabecera,...servidores.map(s=>columnas.map(c=>c==="id"?s.nombre:s[c]))];
+ const csv="\uFEFF"+filas.map(f=>f.map(csvSeguro).join(";")).join("\r\n");
+ const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8;"}));
+ const a=crear("a");a.href=url;a.download="AIM_inventario_100_servidores.csv";
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-
-// ========================================
-// FUNCIONES DE LA PÁGINA
-// ========================================
-
-const app = document.getElementById("app");
-
-function crearElemento(etiqueta, clase, texto) {
-  const elemento = document.createElement(etiqueta);
-
-  if (clase) {
-    elemento.className = clase;
-  }
-
-  if (texto !== undefined) {
-    elemento.textContent = texto;
-  }
-
-  return elemento;
+function mostrarInventario(){
+ app.replaceChildren();
+ app.append(crear("h2","","Inventario de servidores AIM"));
+ const resumen=crear("div","summary");
+ resumen.append(crear("span","","Total: "+servidores.length));
+ for(const estado of ESTADOS){resumen.append(crear("span","",estado+": "+servidores.filter(s=>s.estado===estado).length));}
+ app.append(resumen);
+ const barra=crear("div","toolbar");barra.append(boton("Exportar Excel / CSV",exportarCSV));app.append(barra);
+ const buscador=crear("input");buscador.type="search";buscador.placeholder="Buscar por servidor, ubicación, número de serie...";
+ const filtroEstado=crear("select");filtroEstado.setAttribute("aria-label","Filtrar por estado");
+ filtroEstado.style.cssText="padding:12px;border-radius:8px;border:1px solid #f5c1df;background:#fff;margin-bottom:18px;max-width:260px";
+ for(const est of ["Todos los estados",...ESTADOS]){const op=crear("option","",est);op.value=est;filtroEstado.append(op);}
+ const contador=crear("p","muted");const grid=crear("div","grid");app.append(buscador,filtroEstado,contador,grid);
+ function pintar(){grid.replaceChildren();const q=buscador.value.toLowerCase().trim();
+  const resultados=servidores.filter(s=>(filtroEstado.value==="Todos los estados"||s.estado===filtroEstado.value)&&[s.nombre,s.ubicacion,s.serie,s.procesador,s.aim].join(" ").toLowerCase().includes(q));
+  contador.textContent="Mostrando "+resultados.length+" de "+servidores.length+" servidores";
+  for(const s of resultados){const card=crear("div","card");card.append(crear("h3","",s.nombre),insignia(s.estado),crear("p","muted","Ubicación: "+s.ubicacion));
+   const a=crear("a","btn","Ver ficha y QR");a.href="?id="+s.id;card.append(a);grid.append(card);}
+  if(!resultados.length)grid.append(crear("p","muted","No se encontraron servidores."));
+ }
+ buscador.addEventListener("input",pintar);filtroEstado.addEventListener("change",pintar);pintar();
 }
-
-function mostrarInventario() {
-
-  app.replaceChildren();
-
-  const titulo = crearElemento(
-    "h2", "", "Inventario de servidores AIM"
-  );
-
-  const contador = crearElemento(
-    "p", "muted count",
-    "Total: " + servidores.length + " servidores"
-  );
-
-  const buscador = crearElemento("input");
-  buscador.type = "search";
-  buscador.placeholder =
-    "Buscar servidor por número, ubicación o serie...";
-
-  const grid = crearElemento("div", "grid");
-
-  app.append(titulo, contador, buscador, grid);
-
-  function pintar(filtro = "") {
-
-    grid.replaceChildren();
-
-    const resultados = servidores.filter(s => {
-      const texto = [
-        s.nombre,
-        s.ubicacion,
-        s.serie
-      ].join(" ").toLowerCase();
-
-      return texto.includes(filtro.toLowerCase());
-    });
-
-    contador.textContent =
-      "Mostrando " + resultados.length +
-      " de " + servidores.length + " servidores";
-
-    if (resultados.length === 0) {
-      grid.appendChild(
-        crearElemento("p", "muted",
-          "No se encontraron servidores.")
-      );
-      return;
-    }
-
-    resultados.forEach(servidor => {
-
-      const card = crearElemento("div", "card");
-
-      const nombre = crearElemento(
-        "h3", "", servidor.nombre
-      );
-
-      const ubicacion = crearElemento(
-        "p", "muted",
-        "Ubicación: " + servidor.ubicacion
-      );
-
-      const enlace = crearElemento(
-        "a", "btn", "Ver ficha técnica"
-      );
-
-      enlace.href =
-        "?id=" + encodeURIComponent(servidor.id);
-
-      card.append(nombre, ubicacion, enlace);
-      grid.appendChild(card);
-
-    });
-  }
-
-  buscador.addEventListener("input", () => {
-    pintar(buscador.value);
-  });
-
-  pintar();
+function mostrarServidor(id){
+ app.replaceChildren();const s=servidores.find(x=>x.id===id);
+ if(!s){app.append(crear("h2","","Servidor no encontrado"));return;}
+ const contenedor=crear("div","details");const volver=crear("a","btn back","← Volver al inventario");volver.href=window.location.pathname;
+ const tarjeta=crear("div","card");tarjeta.append(crear("h2","", "AIM "+s.nombre),crear("p","muted","Ficha técnica del equipo"));
+ const linea=crear("div","status-line");linea.append(crear("strong","","Estado: "),insignia(s.estado));tarjeta.append(linea);
+ for(const [clave,etiqueta] of Object.entries(CAMPOS)){
+  const campo=crear("div","field");campo.append(crear("strong","",etiqueta),crear("span","",s[clave]||"Pendiente de registrar"));tarjeta.append(campo);
+ }
+ const qr=crear("section","qr-box");qr.append(crear("h2","print-title","AIM "+s.nombre));
+ const zona=crear("div","qr-code");zona.id="qr-"+s.id;qr.append(zona);
+ const url=linkServidor(s.id);qr.append(crear("p","qr-link",url));
+ const acciones=crear("div","toolbar no-print");acciones.style.justifyContent="center";
+ acciones.append(boton("Imprimir etiqueta QR",()=>window.print()));qr.append(acciones);
+ tarjeta.append(qr);contenedor.append(volver,tarjeta);app.append(contenedor);
+ if(typeof QRCode!=="undefined"){
+  new QRCode(zona,{text:url,width:220,height:220,colorDark:"#191327",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+ }else{
+  zona.append(crear("p","muted","No se pudo cargar el generador QR. Comprueba tu conexión a Internet."));
+ }
 }
-
-function mostrarServidor(id) {
-
-  app.replaceChildren();
-
-  const servidorBase = servidores.find(s => s.id === id);
-
-const servidor = servidorBase
-  ? {
-      ...servidorBase,
-      ...(DATOS_SERVIDORES[id] || {})
-    }
-  : null;
-
-  if (!servidor) {
-
-    app.appendChild(
-      crearElemento("h2", "",
-        "Servidor no encontrado")
-    );
-
-    const volver = crearElemento(
-      "a", "btn", "Volver al inventario"
-    );
-
-    volver.href = window.location.pathname;
-
-    app.appendChild(volver);
-    return;
-  }
-
-  const contenedor = crearElemento("div", "details");
-
-  const volver = crearElemento(
-    "a", "btn back", "← Volver al inventario"
-  );
-
-  volver.href = window.location.pathname;
-
-  const tarjeta = crearElemento("div", "card");
-
-  const titulo = crearElemento(
-    "h2", "", "AIM " + servidor.nombre
-  );
-
-  const subtitulo = crearElemento(
-    "p", "muted", "Ficha técnica del equipo"
-  );
-
-  tarjeta.append(titulo, subtitulo);
-
-  Object.entries(CAMPOS).forEach(([clave, etiqueta]) => {
-
-    const campo = crearElemento("div", "field");
-
-    const nombre = crearElemento(
-      "strong", "", etiqueta
-    );
-
-    const valor = crearElemento(
-      "span", "",
-      servidor[clave] || "Pendiente de registrar"
-    );
-
-    campo.append(nombre, valor);
-    tarjeta.appendChild(campo);
-
-  });
-
-  contenedor.append(volver, tarjeta);
-  app.appendChild(contenedor);
-}
-
-// ========================================
-// DETECTAR SI VIENE DESDE UN CÓDIGO QR
-// ========================================
-
-const parametros = new URLSearchParams(
-  window.location.search
-);
-
-const servidorSolicitado = parametros.get("id");
-
-if (servidorSolicitado) {
-  mostrarServidor(servidorSolicitado);
-} else {
-  mostrarInventario();
-}
-
+const params=new URLSearchParams(window.location.search);
+const id=params.get("id");if(id)mostrarServidor(id);else mostrarInventario();
 </script>
-
 </body>
 </html>
