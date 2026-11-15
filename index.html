@@ -355,7 +355,14 @@ function mostrarServidor(id) {
 
   app.replaceChildren();
 
-  const servidor = servidores.find(s => s.id === id);
+  const servidorBase = servidores.find(s => s.id === id);
+
+const servidor = servidorBase
+  ? {
+      ...servidorBase,
+      ...(DATOS_SERVIDORES[id] || {})
+    }
+  : null;
 
   if (!servidor) {
 
