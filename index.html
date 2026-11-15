@@ -244,7 +244,8 @@ const datos = {
 servidores.push({
   id: id,
   nombre: "SERVER " + id,
-  ...datos
+  ...datos,
+  ...(DATOS_SERVIDORES[id] || {})
 });
 
 }
